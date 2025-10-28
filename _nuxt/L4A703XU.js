@@ -1,0 +1,1 @@
+import{E as a}from"./rUxWeFGW.js";const i=async(r,t,o=!0)=>{const n=a();let e;try{e=await fetch(n.public.API_URL+r,{headers:{"Content-Type":"application/json","ngrok-skip-browser-warning":"true"},...t})}catch(s){return console.warn("use client fetch warning: ",s),{data:null,status:!1,message:"An error occurred while fetching data"}}return await e.json()};export{i as u};
