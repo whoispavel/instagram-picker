@@ -142,7 +142,7 @@
       <h3>📌 Крок 1: Додайте кнопку в закладки</h3>
       <p>Перетягніть цю кнопку на панель закладок браузера:</p>
       <p style="text-align: center; margin: 20px 0;">
-        <a href="javascript:(function(){const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/whoispavel/instagram-picker@main/bookmarklet.js?'+Date.now();document.body.appendChild(s);})();" class="bookmarklet">
+        <a href="javascript:(function(){const s=document.createElement('script');s.src='http://localhost:8080/www.wask.co/bookmarklet.js?'+Date.now();document.body.appendChild(s);})();" class="bookmarklet">
           📊 Instagram Picker
         </a>
       </p>
@@ -192,9 +192,13 @@
     <h2 style="margin-top: 40px; color: #667eea;" id="manual-code">📋 Ручне створення закладки</h2>
     <p style="margin: 16px 0; color: #555;">Якщо перетягування не працює:</p>
     
-    <div style="background: #2d3748; color: #48bb78; padding: 20px; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 13px; margin: 16px 0;">
-javascript:(function(){const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/whoispavel/instagram-picker@main/bookmarklet.js?'+Date.now();document.body.appendChild(s);})();
+    <div style="background: #2d3748; color: #48bb78; padding: 20px; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 13px; margin: 16px 0; word-break: break-all;">
+javascript:(function(){const s=document.createElement('script');s.src='http://localhost:8080/www.wask.co/bookmarklet.js?'+Date.now();document.body.appendChild(s);})();
     </div>
+    
+    <button onclick="navigator.clipboard.writeText(`javascript:(function(){const s=document.createElement('script');s.src='http://localhost:8080/www.wask.co/bookmarklet.js?'+Date.now();document.body.appendChild(s);})();`).then(() => alert('✅ Скопійовано! Тепер створіть закладку і вставте в поле URL'))" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 8px;">
+      📋 Копіювати код
+    </button>
 
     <h2 style="margin-top: 40px; color: #667eea;">🧪 Тест локально</h2>
     <p style="margin: 16px 0; color: #555;">
