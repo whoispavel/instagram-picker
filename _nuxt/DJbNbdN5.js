@@ -1,1 +1,0 @@
-import{_ as o,c as t,j as c,o as n,aM as a}from"./rUxWeFGW.js";const _={},s={class:"form-container"};function r(f,i){const e=a;return n(),t("div",s,[c(e)])}const d=o(_,[["render",r]]);export{d as default};
