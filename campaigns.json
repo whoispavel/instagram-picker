@@ -1,0 +1,64 @@
+[
+  {
+    "postUrl": "https://www.instagram.com/reel/DQJXqZ-jGnU/",
+    "stats": { "totalComments": 180 },
+    "accounts": [
+      {
+        "username": "sample_user_1",
+        "profileUrl": "https://www.instagram.com/sample_user_1/",
+        "comment": "@friend1 @friend2 найкращий конкурс!"
+      },
+      {
+        "username": "sample_user_2",
+        "profileUrl": "https://www.instagram.com/sample_user_2/",
+        "comment": "@ally @mate буду чекати результати!"
+      },
+      {
+        "username": "sample_user_3",
+        "profileUrl": "https://www.instagram.com/sample_user_3/",
+        "comment": "@crew @team удачі всім!"
+      },
+      {
+        "username": "sample_user_4",
+        "profileUrl": "https://www.instagram.com/sample_user_4/",
+        "comment": "@pal1 @pal2 ❤️"
+      },
+      {
+        "username": "sample_user_5",
+        "profileUrl": "https://www.instagram.com/sample_user_5/",
+        "comment": "@buddy1 @buddy2 нехай пощастить!"
+      }
+    ]
+  },
+  {
+    "postUrl": "https://www.instagram.com/reel/DPREDA0Aluv/",
+    "stats": { "totalComments": 95 },
+    "accounts": [
+      {
+        "username": "another_user_1",
+        "profileUrl": "https://www.instagram.com/another_user_1/",
+        "comment": "@wow @cool беремо участь!"
+      },
+      {
+        "username": "another_user_2",
+        "profileUrl": "https://www.instagram.com/another_user_2/",
+        "comment": "@squad1 @squad2 пальці схрещені"
+      },
+      {
+        "username": "another_user_3",
+        "profileUrl": "https://www.instagram.com/another_user_3/",
+        "comment": "@fam1 @fam2 хочу перемогти!"
+      },
+      {
+        "username": "another_user_4",
+        "profileUrl": "https://www.instagram.com/another_user_4/",
+        "comment": "@mate1 @mate2 удачі всім"
+      },
+      {
+        "username": "another_user_5",
+        "profileUrl": "https://www.instagram.com/another_user_5/",
+        "comment": "@bestie1 @bestie2 кайф"
+      }
+    ]
+  }
+]
