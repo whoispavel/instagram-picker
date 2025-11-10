@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Instagram Comment Picker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f9fbff;
+      --card: #ffffff;
+      --border: rgba(15, 23, 42, 0.08);
+      --text: #0f172a;
+      --muted: #6b7b93;
+      --accent: #0ad882;
+      --accent-dark: #08b06a;
+      --danger: #ff5f7a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      width: min(920px, 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .step {
+      background: var(--card);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: rgba(10, 216, 130, 0.15);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .hero {
+      background: var(--card);
+      border-radius: 28px;
+      border: 1px solid var(--border);
+      padding: clamp(20px, 5vw, 40px);
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.1);
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 6vw, 42px);
+      margin-bottom: 12px;
+    }
+
+    .hero p { color: var(--muted); }
+
+    .card {
+      background: var(--card);
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      padding: clamp(18px, 4vw, 28px);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    input[type="url"] {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px 18px;
+      font-size: 16px;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="url"]:focus {
+      outline: none;
+      border-color: rgba(10, 216, 130, 0.8);
+      box-shadow: 0 0 0 3px rgba(10, 216, 130, 0.2);
+    }
+
+    button {
+      border: none;
+      border-radius: 18px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--accent);
+      color: #ffffff;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 35px rgba(10, 216, 130, 0.35);
+    }
+
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .status { font-size: 14px; color: var(--muted); min-height: 18px; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+    }
+
+    .stat {
+      border-radius: 18px;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      padding: 18px;
+      background: #fbfdfc;
+    }
+
+    .stat span {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 34px;
+      margin-top: 6px;
+    }
+
+    .comment-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 320px;
+      overflow: hidden;
+    }
+
+    .comment {
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      border-radius: 16px;
+      padding: 16px;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    .comment strong { color: var(--accent-dark); }
+
+    .comment p { color: var(--muted); margin-top: 4px; font-size: 14px; }
+
+    .winner {
+      text-align: center;
+      padding: 32px;
+      border-radius: 24px;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      background: linear-gradient(145deg, rgba(10, 216, 130, 0.12), rgba(10, 216, 130, 0.02));
+      min-height: 180px;
+    }
+
+    .winner-name { font-size: 32px; font-weight: 700; margin-top: 12px; }
+    .winner-comment { color: var(--muted); margin-top: 8px; }
+
+    .hidden { display: none !important; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(14px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .confetti-piece {
+      position: fixed;
+      top: -10vh;
+      width: 10px;
+      height: 18px;
+      border-radius: 4px;
+      opacity: 0;
+      animation: confetti 3s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes confetti {
+      0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(540deg); opacity: 0; }
+    }
+
+    @media (max-width: 640px) {
+      .card { padding: 18px; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="steps">
+      <article class="step"><div class="step-number">1</div><div><strong>Scan Post</strong><p class="status">Жодного токена не потрібно</p></div></article>
+      <article class="step"><div class="step-number">2</div><div><strong>Find Attendance</strong><p class="status">Мінімум 1 @tag</p></div></article>
+      <article class="step"><div class="step-number">3</div><div><strong>Determine Winner</strong><p class="status">Автоматично</p></div></article>
+    </section>
+
+    <header class="hero">
+      <h1>Free Instagram Comment Picker</h1>
+      <p>Вставте посилання на пост, натисніть SCAN та миттєво отримайте переможця. Без токенів, без авторизацій, просто як Wask.</p>
+    </header>
+
+    <section class="card">
+      <form id="scanForm">
+        <label for="postUrl">Посилання на пост або рілс</label>
+        <input type="url" id="postUrl" placeholder="https://www.instagram.com/p/ABC123DEF/" required>
+        <button type="submit" id="scanButton">SCAN</button>
+        <p class="status" id="statusText">Готові до старту.</p>
+      </form>
+    </section>
+
+    <section class="card stats">
+      <article class="stat"><span>Коментарів</span><strong id="statTotal">0</strong></article>
+    </section>
+
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+        <h2>Коментарі</h2>
+        <button type="button" id="winnerButton" disabled>Вибрати переможця</button>
+      </div>
+      <div class="comment-list" id="commentList"></div>
+      <p class="status" id="emptyState">Немає даних. Натисніть SCAN.</p>
+    </section>
+
+    <section class="card winner" id="winnerCard">
+      <p>Результат зʼявиться тут.</p>
+    </section>
+  </div>
+
+  <script>
+    const form = document.getElementById('scanForm');
+    const postUrlInput = document.getElementById('postUrl');
+    const scanButton = document.getElementById('scanButton');
+    const statusText = document.getElementById('statusText');
+    const commentList = document.getElementById('commentList');
+    const emptyState = document.getElementById('emptyState');
+    const winnerButton = document.getElementById('winnerButton');
+    const winnerCard = document.getElementById('winnerCard');
+    const statTotal = document.getElementById('statTotal');
+
+    const state = { comments: [], entries: [] };
+
+    const setStatus = (msg, tone = 'muted') => {
+      statusText.textContent = msg;
+      statusText.style.color = tone === 'error' ? 'var(--danger)' : tone === 'success' ? 'var(--accent-dark)' : 'var(--muted)';
+    };
+
+    const renderStats = (stats = { totalComments: 0 }) => {
+      statTotal.textContent = stats.totalComments;
+    };
+
+    const renderComments = (comments) => {
+      commentList.innerHTML = '';
+      if (!comments.length) {
+        emptyState.classList.remove('hidden');
+        return;
+      }
+      emptyState.classList.add('hidden');
+      comments.slice(0, 12).forEach((comment, idx) => {
+        const card = document.createElement('article');
+        card.className = 'comment';
+        card.style.animationDelay = `${idx * 40}ms`;
+        card.innerHTML = `
+          <strong>@${comment.username}</strong>
+          <p>${comment.text || 'Без тексту'}</p>
+          <p style="font-size:12px;margin-top:6px;color:var(--muted);">@tag: ${comment.mentions}</p>
+        `;
+        commentList.appendChild(card);
+      });
+      if (comments.length > 12) {
+        const more = document.createElement('p');
+        more.className = 'status';
+        more.textContent = `Ще ${comments.length - 12} коментарів приховано.`;
+        commentList.appendChild(more);
+      }
+    };
+
+    const toggleLoading = (isLoading) => {
+      scanButton.disabled = isLoading;
+      scanButton.textContent = isLoading ? 'Scanning…' : 'SCAN';
+    };
+
+    const spawnConfetti = () => {
+      const palette = ['#0ad882', '#08b06a', '#6ddcc9', '#ffb347'];
+      for (let i = 0; i < 36; i += 1) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = `${Math.random() * 100}%`;
+        piece.style.background = palette[Math.floor(Math.random() * palette.length)];
+        piece.style.width = `${8 + Math.random() * 6}px`;
+        piece.style.height = `${12 + Math.random() * 8}px`;
+        piece.style.animationDelay = `${Math.random() * 0.3}s`;
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 3200);
+      }
+    };
+
+    const shuffleAnimation = () => new Promise((resolve) => {
+      if (!state.entries.length) return resolve();
+      let elapsed = 0;
+      const timer = setInterval(() => {
+        elapsed += 100;
+        const username = state.entries[Math.floor(Math.random() * state.entries.length)];
+        const preview = state.comments.find((c) => c.username === username) || { text: '' };
+        winnerCard.innerHTML = `
+          <p style="color:var(--muted);">Обираємо...</p>
+          <div class="winner-name">@${username}</div>
+          <div class="winner-comment">${preview.text || ''}</div>
+        `;
+        if (elapsed >= 1800) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 100);
+    });
+
+    const pickWinner = async () => {
+      if (!state.entries.length) {
+        setStatus('Немає допущених учасників.', 'error');
+        return;
+      }
+      winnerButton.disabled = true;
+      await shuffleAnimation();
+      const username = state.entries[Math.floor(Math.random() * state.entries.length)];
+      const winner = state.comments.find((c) => c.username === username) || { text: '' };
+      winnerCard.innerHTML = `
+        <p style="color:var(--accent-dark);font-weight:600;">Вітаємо переможця!</p>
+        <div class="winner-name">@${username}</div>
+        <div class="winner-comment">${winner.text || ''}</div>
+      `;
+      setStatus(`Переможець: @${username}`, 'success');
+      spawnConfetti();
+      winnerButton.disabled = false;
+    };
+
+    winnerButton.addEventListener('click', pickWinner);
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const postUrl = postUrlInput.value.trim();
+      if (!postUrl) return;
+      toggleLoading(true);
+      setStatus('Завантажуємо коментарі…');
+      winnerCard.innerHTML = '<p>Очікуємо результат.</p>';
+      try {
+        const response = await fetch('/api/scrape/comments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ postUrl }),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Не вдалося отримати коментарі.');
+        }
+        state.comments = data.comments || [];
+        state.entries = data.entries || [];
+        renderStats(data.stats);
+        renderComments(state.comments);
+        winnerCard.innerHTML = '<p>Натисніть «Вибрати переможця»</p>';
+        winnerButton.disabled = !state.entries.length;
+        setStatus(`Знайдено ${state.comments.length} коментарів.`, 'success');
+      } catch (error) {
+        console.error(error);
+        setStatus(error.message, 'error');
+        renderStats();
+        state.comments = [];
+        state.entries = [];
+        renderComments([]);
+        winnerButton.disabled = true;
+        winnerCard.innerHTML = '<p>Помилка. Перевірте посилання і спробуйте ще.</p>';
+      } finally {
+        toggleLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>
