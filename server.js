@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -38,7 +37,6 @@ if (!SESSION_ID) {
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
 const cache = new Map();
 
@@ -298,8 +296,8 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime(), cacheEntries: cache.size });
 });
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'Instagram picker API is running' });
 });
 
 app.listen(PORT, () => {
