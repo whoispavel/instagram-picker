@@ -11,6 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const CACHE_TTL = Number(process.env.CACHE_TTL_MS) || 5 * 60 * 1000;
 const SESSION_ID = process.env.SESSION_ID;
+const NAVIGATION_TIMEOUT = Number(process.env.NAVIGATION_TIMEOUT_MS) || 90 * 1000;
 const USER_AGENT =
   process.env.USER_AGENT ||
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
@@ -109,7 +110,7 @@ async function extractMediaId(postUrl) {
       secure: true,
     });
 
-    await page.goto(postUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+    await page.goto(postUrl, { waitUntil: 'networkidle2', timeout: NAVIGATION_TIMEOUT });
 
     const mediaId = await page.evaluate(() => {
       const extractFromData = (data) => {
