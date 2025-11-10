@@ -110,7 +110,12 @@ async function extractMediaId(postUrl) {
       secure: true,
     });
 
-    await page.goto(postUrl, { waitUntil: 'networkidle2', timeout: NAVIGATION_TIMEOUT });
+    const cleanUrl = new URL(postUrl);
+    cleanUrl.search = '';
+    await page.goto(cleanUrl.toString(), { waitUntil: 'networkidle2', timeout: NAVIGATION_TIMEOUT });
+
+    const htmlSnippet = await page.content();
+    console.log('HTML snippet:', htmlSnippet.slice(0, 400));
 
     const mediaId = await page.evaluate(() => {
       const extractFromData = (data) => {
