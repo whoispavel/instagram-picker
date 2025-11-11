@@ -625,6 +625,14 @@
         state.previewUrl = data.previewUrl || '';
         state.recent = data.recent || [];
         renderPreview(state.previewUrl);
+        if (!Number(state.stats.totalComments || 0)) {
+          showAlert('No comments detected for this post. Please refresh the page and try again.');
+          setStatus('No public comments found for this link.', 'error');
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+          return;
+        }
         const cancelHint = maybeShowOverloadMessage(state.stats.totalComments);
         await animateCommentCounter(state.stats.totalComments);
         cancelHint();
