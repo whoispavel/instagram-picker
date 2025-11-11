@@ -317,13 +317,17 @@ function parseSheetRows(rows = []) {
       if (!winners.length) {
         return null;
       }
+      const recent = parseRecentEntries(String(recentRaw));
+      if (recentRaw && !recent.length) {
+        console.warn(`Recent column has data but parsed empty for ${info.shortcode}. Raw:`, recentRaw);
+      }
       return {
         shortcode: info.shortcode,
         type: info.type,
         canonicalUrl: info.canonicalUrl,
         embedUrl: info.embedUrl,
         winners,
-        recent: parseRecentEntries(String(recentRaw)),
+        recent,
         commentsCount: commentsCount || winners.length,
       };
     })
