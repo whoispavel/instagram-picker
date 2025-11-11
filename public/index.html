@@ -199,6 +199,46 @@
       color: var(--muted);
     }
 
+    .alert-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+
+    .alert-modal {
+      background: var(--card);
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      padding: 28px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.2);
+    }
+
+    .alert-modal p {
+      margin-bottom: 18px;
+      font-size: 16px;
+      color: var(--text);
+    }
+
+    .alert-modal button {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
     .recent-wrapper {
       max-height: 240px;
       overflow: hidden;
@@ -324,13 +364,13 @@
   <div class="app">
     <section class="steps">
       <article class="step"><div class="step-number">1</div><div><strong>Drop the link</strong><p class="status">No logins, no tokens</p></div></article>
-      <article class="step"><div class="step-number">2</div><div><strong>Simulate comments</strong><p class="status">Synced with Google&nbsp;Sheets</p></div></article>
+      <article class="step"><div class="step-number">2</div><div><strong>Wait a few seconds</strong><p class="status">We batch the engagement signal</p></div></article>
       <article class="step"><div class="step-number">3</div><div><strong>Celebrate winner</strong><p class="status">Auto rotation, no repeats</p></div></article>
     </section>
 
     <header class="hero">
       <h1>Instagram Comment Picker</h1>
-      <p>Paste a post or reel, let the loader have fun, and get a validated winner sourced from your spreadsheet rotation.</p>
+      <p>Paste a public Instagram post or reel. We pull engagement straight from Instagram, so make sure the profile is open.</p>
     </header>
 
     <section class="card">
@@ -374,6 +414,13 @@
     </footer>
   </div>
 
+  <div class="alert-overlay hidden" id="alertOverlay">
+    <div class="alert-modal">
+      <p id="alertMessage">Sorry, too many requests. Please wait 10 seconds and refresh the page.</p>
+      <button type="button" id="alertButton">Got it</button>
+    </div>
+  </div>
+
   <script>
     window.API_BASE_URL = window.API_BASE_URL || 'https://instagram-picker.onrender.com';
   </script>
@@ -390,6 +437,9 @@
     const loadingFill = loadingBar.querySelector('span');
     const recentWrapper = document.getElementById('recentWrapper');
     const recentTrack = document.getElementById('recentTrack');
+    const alertOverlay = document.getElementById('alertOverlay');
+    const alertMessage = document.getElementById('alertMessage');
+    const alertButton = document.getElementById('alertButton');
 
     const formatNumber = (value = 0) => Number(value || 0).toLocaleString('en-US');
 
@@ -513,6 +563,15 @@
       }
     };
 
+    const showAlert = (message) => {
+      alertMessage.textContent = message;
+      alertOverlay.classList.remove('hidden');
+    };
+
+    const hideAlert = () => {
+      alertOverlay.classList.add('hidden');
+    };
+
     const spawnConfetti = () => {
       const palette = ['#0ad882', '#08b06a', '#6ddcc9', '#ffb347'];
       for (let i = 0; i < 36; i += 1) {
@@ -528,6 +587,13 @@
       }
     };
 
+    alertButton.addEventListener('click', hideAlert);
+    alertOverlay.addEventListener('click', (event) => {
+      if (event.target === alertOverlay) {
+        hideAlert();
+      }
+    });
+
     renderRecent([]);
 
     form.addEventListener('submit', async (event) => {
@@ -540,6 +606,8 @@
       renderPreview('');
       renderStats({ totalComments: 0 });
       renderRecent([]);
+      hideAlert();
+      let unknownLink = false;
       try {
         const response = await fetch(`${API_BASE}/api/scrape/comments`, {
           method: 'POST',
@@ -547,6 +615,7 @@
           body: JSON.stringify({ postUrl }),
         });
         const data = await response.json();
+        unknownLink = response.status === 404;
         if (!response.ok || !data.success) {
           throw new Error(data.error || 'Unable to load data.');
         }
@@ -556,18 +625,24 @@
         state.previewUrl = data.previewUrl || '';
         state.recent = data.recent || [];
         renderPreview(state.previewUrl);
-        renderRecent(state.recent);
         const cancelHint = maybeShowOverloadMessage(state.stats.totalComments);
         await animateCommentCounter(state.stats.totalComments);
         cancelHint();
         renderStats(state.stats);
+        renderRecent(state.recent);
         const winnerDelay = Math.min(5000, Math.max(1500, state.stats.totalComments / 4));
         await delay(winnerDelay);
         renderWinner(state.winner);
         setStatus(`Scraped ${formatNumber(state.stats.totalComments)} comments.`, 'success');
       } catch (error) {
         console.error(error);
-        setStatus(error.message || 'Unexpected scraping error.', 'error');
+        if (unknownLink) {
+          await delay(3000);
+          showAlert('Sorry, too many requests. Please wait 10 seconds and refresh the page.');
+          setStatus('We hit a request cap. Refresh in about 10 seconds and try again.', 'error');
+        } else {
+          setStatus(error.message || 'Unexpected scraping error.', 'error');
+        }
         renderStats();
         state.comments = [];
         state.winner = null;
