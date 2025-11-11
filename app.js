@@ -120,6 +120,31 @@ function parseWinners(raw = '') {
     .filter(Boolean);
 }
 
+function parseRecentEntries(raw = '') {
+  if (!raw) return [];
+  return raw
+    .split(/\r?\n/)
+    .flatMap((line) => line.split(/\s*[;,]\s*/))
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const handleMatch = entry.match(/@([\w._-]+)/);
+      if (!handleMatch) {
+        return null;
+      }
+      const username = handleMatch[1];
+      const commentMatch = entry.match(/"([^"]*)"/);
+      const comment = commentMatch
+        ? commentMatch[1]
+        : entry.replace(handleMatch[0], '').replace(/"/g, '').trim();
+      return {
+        username,
+        comment,
+      };
+    })
+    .filter(Boolean);
+}
+
 function shuffle(list = []) {
   const array = [...list];
   for (let i = array.length - 1; i > 0; i -= 1) {
@@ -177,6 +202,7 @@ function convertLegacyCampaigns(entries = []) {
         canonicalUrl: info.canonicalUrl,
         embedUrl: info.embedUrl,
         winners,
+        recent: parseRecentEntries(String(item.recent || '')),
         commentsCount: item.stats?.totalComments || winners.length,
       };
     })
@@ -233,6 +259,14 @@ function buildComments(campaign) {
   }));
 }
 
+function buildRecentTrack(campaign) {
+  return (campaign.recent || []).map((entry, idx) => ({
+    username: entry.username,
+    comment: entry.comment || '',
+    order: idx + 1,
+  }));
+}
+
 function getCampaignByUrl(postUrl = '') {
   const info = extractPostInfo(postUrl);
   if (!info) {
@@ -278,6 +312,7 @@ function parseSheetRows(rows = []) {
       }
       const commentsCount = parseNumber(cells[1]?.v ?? cells[1]?.f);
       const winnersRaw = cells[2]?.v || cells[2]?.f || '';
+      const recentRaw = cells[3]?.v || cells[3]?.f || '';
       const winners = parseWinners(String(winnersRaw));
       if (!winners.length) {
         return null;
@@ -288,6 +323,7 @@ function parseSheetRows(rows = []) {
         canonicalUrl: info.canonicalUrl,
         embedUrl: info.embedUrl,
         winners,
+        recent: parseRecentEntries(String(recentRaw)),
         commentsCount: commentsCount || winners.length,
       };
     })
