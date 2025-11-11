@@ -460,7 +460,7 @@
       const postUrl = postUrlInput.value.trim();
       if (!postUrl) return;
       toggleLoading(true);
-      setStatus('Scanning spreadsheet…');
+      setStatus('Simulating Instagram scrape…');
       renderWinner(null);
       renderPreview('');
       renderStats({ totalComments: 0 });
@@ -485,10 +485,10 @@
         cancelHint();
         renderStats(state.stats);
         renderWinner(state.winner);
-        setStatus(`Processed ${formatNumber(state.stats.totalComments)} comments.`, 'success');
+        setStatus(`Scraped ${formatNumber(state.stats.totalComments)} comments.`, 'success');
       } catch (error) {
         console.error(error);
-        setStatus(error.message, 'error');
+        setStatus(error.message || 'Unexpected scraping error.', 'error');
         renderStats();
         state.comments = [];
         state.winner = null;

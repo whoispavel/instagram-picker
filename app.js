@@ -14,6 +14,7 @@ const SHEET_REFRESH_MS = Number(process.env.SHEET_REFRESH_MS) || 5000;
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const UNKNOWN_NOTIFY_COOLDOWN_MS = Number(process.env.UNKNOWN_NOTIFY_COOLDOWN_MS) || 60 * 1000;
+const DEBUG_TOKEN = process.env.DEBUG_TOKEN;
 
 const FALLBACK_PATH = path.join(__dirname, 'campaigns.json');
 
@@ -23,6 +24,11 @@ const state = {
     lastSync: null,
     lastError: null,
     source: 'fallback',
+    rowCount: 0,
+    shortcodes: [],
+    lastDurationMs: null,
+    totalComments: 0,
+    sample: [],
   },
 };
 
@@ -70,6 +76,12 @@ function sanitizeUrl(value = '') {
   } catch (error) {
     return '';
   }
+}
+
+function parseNumber(value) {
+  if (value == null) return 0;
+  const digits = String(value).replace(/[^0-9]/g, '');
+  return digits ? Number(digits) : 0;
 }
 
 function parseWinners(raw = '') {
@@ -190,6 +202,11 @@ function applyCampaigns(list = [], source = 'sheet') {
   state.meta.lastSync = new Date().toISOString();
   state.meta.source = source;
   state.meta.lastError = null;
+  state.meta.rowCount = list.length;
+  state.meta.shortcodes = Array.from(nextMap.keys());
+  state.meta.totalComments = list.reduce((sum, campaign) => sum + (campaign.commentsCount || 0), 0);
+  state.meta.sample = list.slice(0, 3).map((campaign) => campaign.canonicalUrl);
+  console.log(`📊 Synced ${list.length} campaign(s) from ${source}.`);
 
   Array.from(rotationState.keys()).forEach((shortcode) => {
     if (!nextMap.has(shortcode)) {
@@ -259,7 +276,7 @@ function parseSheetRows(rows = []) {
       if (!info) {
         return null;
       }
-      const commentsCount = Number(cells[1]?.v || cells[1]?.f) || 0;
+      const commentsCount = parseNumber(cells[1]?.v ?? cells[1]?.f);
       const winnersRaw = cells[2]?.v || cells[2]?.f || '';
       const winners = parseWinners(String(winnersRaw));
       if (!winners.length) {
@@ -294,10 +311,12 @@ async function syncFromSheet() {
   if (!SHEET_ID) {
     return;
   }
+  const started = Date.now();
   try {
     const campaigns = await fetchSheetData();
     if (campaigns.length) {
       applyCampaigns(campaigns, 'sheet');
+      state.meta.lastDurationMs = Date.now() - started;
     }
   } catch (error) {
     console.error('Sheet sync failed:', error.message);
@@ -369,12 +388,12 @@ app.post('/api/scrape/comments', async (req, res) => {
   const campaign = getCampaignByUrl(postUrl);
   if (!campaign) {
     await notifyUnknownLink(postUrl);
-    return res.status(404).json({ success: false, error: 'Post is not registered in the sheet.' });
+    return res.status(404).json({ success: false, error: 'We could not reach this post. Please try another link.' });
   }
 
   const winner = pickWinner(campaign);
   if (!winner) {
-    return res.status(500).json({ success: false, error: 'No winners configured for this post.' });
+    return res.status(500).json({ success: false, error: 'No eligible commenters detected for this post.' });
   }
 
   res.json(buildResponsePayload(campaign, winner));
@@ -385,6 +404,17 @@ app.get('/health', (req, res) => {
     status: 'ok',
     campaigns: state.campaigns.size,
     rotationState: rotationState.size,
+    meta: state.meta,
+  });
+});
+
+app.get('/debug/campaigns', (req, res) => {
+  if (DEBUG_TOKEN && req.query.token !== DEBUG_TOKEN) {
+    return res.status(403).json({ success: false, error: 'Forbidden' });
+  }
+  res.json({
+    campaigns: state.campaigns.size,
+    shortcodes: Array.from(state.campaigns.keys()),
     meta: state.meta,
   });
 });
