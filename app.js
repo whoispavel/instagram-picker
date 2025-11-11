@@ -122,7 +122,8 @@ function parseWinners(raw = '') {
 
 function parseRecentEntries(raw = '') {
   if (!raw) return [];
-  return raw
+  const normalized = String(raw).replace(/[“”]/g, '"');
+  return normalized
     .split(/\r?\n/)
     .flatMap((line) => line.split(/\s*[;,]\s*/))
     .map((entry) => entry.trim())
@@ -134,12 +135,8 @@ function parseRecentEntries(raw = '') {
       }
       const username = handleMatch[1];
       const commentMatch = entry.match(/"([^"]*)"/);
-      const fallbackMatch = entry.match(/“([^”]*)”/);
-      const commentSource = commentMatch || fallbackMatch;
       const comment = commentMatch
         ? commentMatch[1]
-        : fallbackMatch
-          ? fallbackMatch[1]
         : entry.replace(handleMatch[0], '').replace(/"/g, '').trim();
       return {
         username,
@@ -384,6 +381,7 @@ function buildResponsePayload(campaign, winner) {
     winner,
     previewUrl: campaign.embedUrl,
     canonicalUrl: campaign.canonicalUrl,
+    recent: buildRecentTrack(campaign),
     syncedAt: state.meta.lastSync,
   };
 }
@@ -460,6 +458,16 @@ app.get('/debug/campaigns', (req, res) => {
     campaigns: state.campaigns.size,
     shortcodes: Array.from(state.campaigns.keys()),
     meta: state.meta,
+    sample: Array.from(state.campaigns.values())
+      .slice(0, 5)
+      .map((campaign) => ({
+        shortcode: campaign.shortcode,
+        commentsCount: campaign.commentsCount,
+        winners: campaign.winners.length,
+        recentCount: (campaign.recent || []).length,
+        recentPreview: (campaign.recent || []).slice(0, 3),
+        canonicalUrl: campaign.canonicalUrl,
+      })),
   });
 });
 

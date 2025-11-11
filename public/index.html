@@ -416,13 +416,16 @@
         return;
       }
       const profileLink = winner.profileUrl || `https://www.instagram.com/${winner.username}/`;
+      const commentBlock = winner.comment
+        ? `<div class="winner-comment">${winner.comment}</div>`
+        : '';
       winnerCard.innerHTML = `
-        <p style="color:var(--accent-dark);font-weight:600;">Winner #${winner.order}</p>
+        <p style="color:var(--accent-dark);font-weight:600;">Winner</p>
         <div class="winner-name">
           <a href="${profileLink}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">@${winner.username}</a>
         </div>
         <a href="${profileLink}" target="_blank" rel="noopener" class="status" style="display:inline-block;margin-top:8px;">View profile</a>
-        <div class="winner-comment">${winner.comment || 'No comment provided'}</div>
+        ${commentBlock}
       `;
       spawnConfetti();
     };
@@ -459,7 +462,7 @@
           (entry) => `
             <article class="recent-card">
               <strong>@${entry.username}</strong>
-              <p>${entry.comment || 'No comment provided'}</p>
+              <p>${entry.comment || ''}</p>
             </article>
           `
         )
