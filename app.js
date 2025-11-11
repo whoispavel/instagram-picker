@@ -134,8 +134,12 @@ function parseRecentEntries(raw = '') {
       }
       const username = handleMatch[1];
       const commentMatch = entry.match(/"([^"]*)"/);
+      const fallbackMatch = entry.match(/“([^”]*)”/);
+      const commentSource = commentMatch || fallbackMatch;
       const comment = commentMatch
         ? commentMatch[1]
+        : fallbackMatch
+          ? fallbackMatch[1]
         : entry.replace(handleMatch[0], '').replace(/"/g, '').trim();
       return {
         username,
